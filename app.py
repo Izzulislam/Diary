@@ -28,6 +28,8 @@ def home():
 @app.route('/diary', methods=['GET'])
 def show_diary():
     articles = list(db.diary.find({}, {'_id': False}))
+    # sample_receive = request.args.get('sample_give')
+    # print(sample_receive)
     return jsonify({'articles': articles})
 
 @app.route('/diary', methods=['POST'])
@@ -35,23 +37,27 @@ def save_diary():
     title_receive = request.form["title_give"]
     content_receive = request.form["content_give"]
 
-    file = request.files['file_give']
-    extension = file.filename.split('.')[-1]
     today = datetime.now()
     mytime = today.strftime('%Y-%m-%d-%H-%M-%S')
+
+    file = request.files['file_give']
+    extension = file.filename.split('.')[-1]
     filename =  f'static/post-{mytime}.{extension}'
     file.save(filename)
 
     profile = request.files['profile_give']
-    profile_extension = profile.filename.split('.')[-1]
-    profile_filename = f'static/profile-{mytime}.{profile_extension}'
-    profile.save(profile_filename)
+    extension = profile.filename.split('.')[-1]
+    profilename =  f'static/profile-{mytime}.{extension}'
+    profile.save(profilename)
+
+    time = today.strftime('%Y.%m.%d')
 
     doc = {
         'file': filename,
-        'profile': profile_filename,
+        'profile': profilename,
         'title':title_receive,
-        'content':content_receive
+        'content':content_receive,
+        'time': time,
     }
     db.diary.insert_one(doc)
     return jsonify({'message': 'data was saved!'})
